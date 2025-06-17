@@ -7,7 +7,7 @@ This tool provides an intuitive interface to select date ranges and generate vis
 
 - Interactive date range selection for time-lapse creation
 - Modern and responsive UI 
-- Quick selection presets for common time ranges
+- Quick selection presets for time ranges
 - Progress tracking for processing
 
 ## Technologies Used
