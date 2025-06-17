@@ -1,6 +1,7 @@
 # Earth Time-Lapse Builder
 
 A web application that allows users to create Earth time-lapse videos using NASA's EPIC (Earth Polychromatic Imaging Camera) satellite imagery. 
+
 This tool provides an intuitive interface to select date ranges and generate visualizations of Earth from space.
 
 ## Features
