@@ -25,6 +25,8 @@ This tool provides an intuitive interface to select date ranges and generate vis
 3. Select the desired date range or use the quick selection presets.
 4. After the image processing and downloading is done, your required time-lapse is created.
 
+Note: You must use your own NASA API key, after placing it in the `Earth Time-Lapse Builder.html` file. 
+
 ## Contributing
 
 Contributions are welcome!
