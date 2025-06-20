@@ -16,7 +16,7 @@ This tool provides an intuitive interface to select date ranges and generate vis
 - HTML5
 - CSS3
 - JavaScript
-- [NASA EPIC API](https://api.nasa.gov/) (Requires API Key)
+- [NASA EPIC API](https://api.nasa.gov/) (API Key Required Here)
 
 ## How to Run
 
