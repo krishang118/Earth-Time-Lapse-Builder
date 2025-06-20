@@ -1,6 +1,6 @@
 # Earth Time-Lapse Builder
 
-A web application that allows users to create Earth time-lapse videos using NASA's EPIC (Earth Polychromatic Imaging Camera) satellite imagery. 
+A web application that allows the users to create Earth time-lapse videos using NASA's EPIC (Earth Polychromatic Imaging Camera) satellite imagery. 
 
 This tool provides an intuitive interface to select date ranges and generate visualizations of Earth from space.
 
@@ -16,7 +16,7 @@ This tool provides an intuitive interface to select date ranges and generate vis
 - HTML5
 - CSS3
 - JavaScript
-- NASA EPIC API
+- NASA EPIC API (Requires API Key)
 
 ## How to Run
 
