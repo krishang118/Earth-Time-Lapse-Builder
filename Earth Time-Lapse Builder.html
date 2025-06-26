@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Earth Time-Lapse Builder</title>
+    <style>
+        body {
+            font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0c1445, #1e3a8a, #2e4aaf);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            border: none;
+        }
+        .header h2 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            background: linear-gradient(45deg, #60a5fa, #34d399);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .header p {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .control-group {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            border-radius: 8px;
+            border: none;
+        }
+        .control-group h3 {
+            margin-bottom: 12px;
+            color: #60a5fa;
+            font-size: 1.1rem;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #e3e8f0;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+        input[type="date"] {
+            max-width: 180px; 
+        }
+        input:focus, select:focus {
+            border-color: #60a5fa;
+            background: rgba(255, 255, 255, 0.15);
+        }
+        button {
+            background: linear-gradient(45deg, #3b82f6, rgb(18, 78, 158));
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: calc(100% - 8px);
+            margin-top: 8px;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(40, 130, 246, 0.3);
+        }
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .quick-selection {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .quick-select {
+            padding: 6px;
+            font-size: 11px;
+            background: rgba(52, 211, 153, 0.2);
+            border: 1px solid #34d399;
+            margin-top: 0;
+        }
+        .status {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: none;
+        }
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+        .image-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            border: none;
+        }
+        .image-card:hover {
+            transform: scale(1.05);
+        }
+        .image-card img {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+        }
+        .image-card .info {
+            padding: 8px;
+            font-size: 0.85rem;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #34d399, #10b981);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .video-container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 15px;
+            text-align: center;
+            border: none;
+        }
+        .video-container video {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        .loading {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #60a5fa;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .error {
+            background: rgba(239, 68, 68, 0.2);
+            border: none;
+            color: #fca5a5;
+        }
+        .success {
+            background: rgba(34, 197, 94, 0.2);
+            border: none;
+            color: #86efac;
+        }
+        .warning {
+            background: rgba(251, 191, 36, 0.2);
+            border: none;
+            color: #fcd34d;
+        }
+        .tip {
+            background: rgba(251, 191, 36, 0.2);
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 12px;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Earth Time-Lapse Builder</h2>
+            <p>Create time-lapse videos of Earth using NASA's EPIC satellite imagery.</p>
+        </div>
+        <div class="controls">
+            <div class="control-group">
+                <h3>Date Selection</h3>
+                <div class="tip">
+                    EPIC data may not be available for all dates. You may use quick select for guaranteed results.
+                </div>
+                <h4 style="margin: 12px 0 8px 0; color: #34d399;">Quick Select (Known Good Periods):</h4>
+                <div class="quick-selection">
+                    <button onclick="setKnownGoodRange(0)">Oct 2023</button>
+                    <button onclick="setKnownGoodRange(1)">Dec 2023</button>
+                    <button onclick="setKnownGoodRange(2)">Jan 2024</button>
+                    <button onclick="setKnownGoodRange(3)">Mar 2024</button>
+                    <button onclick="setKnownGoodRange(4)">May 2024</button>
+                    <button onclick="setKnownGoodRange(5)">Jul 2023</button>
+                </div>
+                <div class="form-group">
+                    <label for="startDate">Start Date:</label>
+                    <input type="date" id="startDate" value="2023-10-01">
+                </div>
+                <div class="form-group">
+                    <label for="endDate">End Date:</label>
+                    <input type="date" id="endDate" value="2023-10-05">
+                </div>
+                <div class="form-group">
+                    <label for="timeOfDay">Preferred Time (IST):</label>
+                    <select id="timeOfDay">
+                        <option value="17.5">17:30 (Afternoon)</option>
+                        <option value="11.5">11:30 (Morning)</option>
+                        <option value="23.5">23:30 (Night)</option>
+                        <option value="5.5">05:30 (Early Morning)</option>
+                    </select>
+                </div>
+                <button onclick="fetchAvailableDates()">Find Available Dates</button>
+            </div>
+            <div class="control-group">
+                <h3>Video Settings</h3>
+                <div class="form-group">
+                    <label for="frameRate">Frame Rate (FPS):</label>
+                    <select id="frameRate">
+                        <option value="2">2 FPS (Slow)</option>
+                        <option value="5" selected>5 FPS (Normal)</option>
+                        <option value="10">10 FPS (Fast)</option>
+                        <option value="15">15 FPS (Very Fast)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="imageSize">Image Quality (Est. Size):</label>
+                    <select id="imageSize">
+                        <option value="thumbs">Thumbnail (~5KB, low quality)</option>
+                        <option value="jpg" selected>Medium (~1MB, recommended)</option>
+                        <option value="png">Full (~10MB, high quality)</option>
+                    </select>
+                </div>
+                <button onclick="downloadImages()" disabled id="downloadBtn">Download Images</button>
+                <button onclick="createTimelapse()" disabled id="createBtn">Create Time-Lapse</button>
+            </div>
+        </div>
+        <div id="status" class="status" style="display: none;">
+            <div id="statusText">Ready to start...</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+        <div id="imageGrid" class="image-grid"></div>
+        <div id="videoContainer" class="video-container" style="display: none;">
+            <h3>Earth Time-Lapse</h3>
+            <video id="timelapseVideo" controls></video>
+            <div style="margin-top: 12px;">
+                <button onclick="downloadVideo()">Download Video</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        const CORS_PROXIES = [
+            'https://cors-anywhere.herokuapp.com/',
+            'https://proxy.cors.sh/'
+        ];
+        let currentProxyIndex = 0;
+        const API_KEY = '<place your api key here>';
+        let availableDates = [];
+        let imageMetadata = [];
+        let downloadedImages = [];
+        const knownGoodRanges = [
+            { start: '2023-10-01', end: '2023-10-05', name: 'October 2023' },
+            { start: '2023-12-01', end: '2023-12-05', name: 'December 2023' },
+            { start: '2024-01-01', end: '2024-01-05', name: 'January 2024' },
+            { start: '2024-03-01', end: '2024-03-05', name: 'March 2024' },
+            { start: '2024-05-01', end: '2024-05-05', name: 'May 2024' },
+            { start: '2023-07-01', end: '2023-07-05', name: 'July 2023' }
+        ];
+        function setKnownGoodRange(index) {
+            const range = knownGoodRanges[index];
+            document.getElementById('startDate').value = range.start;
+            document.getElementById('endDate').value = range.end;
+            showStatus(`Set to ${range.name} - a period with known EPIC data availability.`);
+        }
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            const statusText = document.getElementById('statusText');
+            statusDiv.style.display = 'block';
+            statusText.innerHTML = message;
+            statusDiv.className = 'status';
+            if (type === 'error') statusDiv.classList.add('error');
+            if (type === 'success') statusDiv.classList.add('success');
+            if (type === 'warning') statusDiv.classList.add('warning');
+        }
+        function updateProgress(percent) {
+            const progressFill = document.getElementById('progressFill');
+            progressFill.style.width = percent + '%';
+        }
+        async function testAPIConnection() {
+            try {
+                const epicResponse = await fetch('https://epic.gsfc.nasa.gov/api/natural');
+                if (epicResponse.ok) {
+                    await epicResponse.json();
+                }
+                const nasaResponse = await fetch(`https://api.nasa.gov/EPIC/api/natural?api_key=${API_KEY}`);
+                if (nasaResponse.ok) {
+                    await epicResponse.json();
+                }
+            } catch (error) {
+            }
+        }
+        async function fetchAvailableDates() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const timeOfDay = document.getElementById('timeOfDay').value;
+            if (!startDate || !endDate) {
+                showStatus('Please select both start and end dates.', 'error');
+                return;
+            }
+            showStatus('Fetching available dates from NASA EPIC API...');
+            updateProgress(0);
+            try {
+                availableDates = [];
+                imageMetadata = [];
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                const totalDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1; 
+                let processedDays = 0;
+                for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                    const dateStr = d.toISOString().split('T')[0];
+                    try {
+                        let response = await fetch(`https://epic.gsfc.nasa.gov/api/natural/date/${dateStr}`);
+                        let data = null;
+                        if (response.ok) {
+                            data = await response.json();
+                        } else if (response.status !== 404) {
+                            response = await fetch(`https://api.nasa.gov/EPIC/api/natural/date/${dateStr}?api_key=${API_KEY}`);
+                            if (response.ok) {
+                                data = await response.json();
+                            }
+                        }
+                        if (data && data.length > 0) {
+                            const preferredImage = findClosestTimeImage(data, timeOfDay);
+                            if (preferredImage) {
+                                availableDates.push(dateStr);
+                                imageMetadata.push({
+                                    date: dateStr,
+                                    image: preferredImage.image,
+                                    timestamp: preferredImage.date
+                                });
+                            }
+                        }
+                    } catch (error) {
+                    }
+                    processedDays++;
+                    updateProgress((processedDays / totalDays) * 100);
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                }
+                if (availableDates.length > 0) {
+                    showStatus(`Found ${availableDates.length} images available for time-lapse.`, 'success');
+                    document.getElementById('downloadBtn').disabled = false;
+                    displayImagePreview();
+                } else {
+                    showStatus(`No images found for ${startDate} to ${endDate}. Try different dates or use Quick Select options.`, 'error');
+                }
+            } catch (error) {
+                showStatus('Error fetching dates: ' + error.message, 'error');
+            }
+        }
+        function findClosestTimeImage(images, preferredHour) {
+            let closest = null;
+            let minDiff = Infinity;
+            const utcHour = parseFloat(preferredHour) - 5.5; 
+            images.forEach(img => {
+                const imgTime = new Date(img.date);
+                const imgHour = imgTime.getUTCHours() + imgTime.getUTCMinutes() / 60;
+                const diff = Math.abs(imgHour - utcHour);
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    closest = img;
+                }
+            });
+            return closest;
+        }
+        function displayImagePreview() {
+            const grid = document.getElementById('imageGrid');
+            grid.innerHTML = '';
+            imageMetadata.slice(0, 12).forEach((img, index) => {
+                const card = document.createElement('div');
+                card.className = 'image-card';
+                const imageUrl = `${CORS_PROXIES[currentProxyIndex]}https://epic.gsfc.nasa.gov/archive/natural/${img.date.split('-').join('/')}/thumbs/${img.image}.jpg`;
+                card.innerHTML = `
+                    <img src="${imageUrl}" alt="Earth ${img.date}" loading="lazy" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjNGY0ZjRmIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkVhcnRoIEltYWdlPC90ZXh0Pjwvc3ZnPg==';">
+                    <div class="info">
+                        <strong>${img.date}</strong><br>
+                        ${new Date(img.date).toLocaleDateString()}
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+            if (imageMetadata.length > 12) {
+                const moreCard = document.createElement('div');
+                moreCard.className = 'image-card';
+                moreCard.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: center; height: 140px; background: rgba(255,255,255,0.1);">
+                        <div style="text-align: center;">
+                            <div style="font-size: 1.8rem;">+${imageMetadata.length - 12}</div>
+                            <div>More Images</div>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(moreCard);
+            }
+        }
+        async function downloadImages() {
+            if (imageMetadata.length === 0) {
+                showStatus('No images to download. Please fetch available dates first.', 'error');
+                return;
+            }
+            const imageSize = document.getElementById('imageSize').value;
+            showStatus(`Downloading ${imageMetadata.length} images (${imageSize === 'thumbs' ? 'low' : imageSize === 'jpg' ? 'medium' : 'high'} quality)...`);
+            updateProgress(0);
+            downloadedImages = [];
+            let failedDownloads = [];
+            let rateLimitCount = 0;
+            async function tryFetchImage(url, date, retries = 2) {
+                let attemptFailed = false;
+                for (let attempt = 1; attempt <= retries; attempt++) {
+                    try {
+                        const response = await fetch(url, { mode: 'cors' });
+                        if (response.ok) {
+                            const blob = await response.blob();
+                            return blob;
+                        } else {
+                            attemptFailed = true;
+                            if (response.status === 429) {
+                                rateLimitCount++;
+                                await new Promise(resolve => setTimeout(resolve, 15000));
+                            } else if (response.status === 403 && url.includes(CORS_PROXIES[currentProxyIndex])) {
+                                currentProxyIndex = (currentProxyIndex + 1) % CORS_PROXIES.length;
+                            }
+                            if (attempt === retries && attemptFailed) {
+                                return null;
+                            }
+                        }
+                    } catch (error) {
+                        attemptFailed = true;
+                        currentProxyIndex = (currentProxyIndex + 1) % CORS_PROXIES.length;
+                        if (attempt === retries && attemptFailed) {
+                            return null;
+                        }
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    }
+                }
+            }
+            for (let i = 0; i < imageMetadata.length; i++) {
+                const img = imageMetadata[i];
+                const datePath = img.date.split('-').join('/');
+                let blob = null;
+                let attemptFailed = false;
+                let epicUrl, nasaUrl;
+                if (imageSize === 'thumbs') {
+                    epicUrl = `${CORS_PROXIES[currentProxyIndex]}https://epic.gsfc.nasa.gov/archive/natural/${datePath}/thumbs/${img.image}.jpg`;
+                    nasaUrl = `https://api.nasa.gov/EPIC/archive/natural/${datePath}/thumbs/${img.image}.jpg?api_key=${API_KEY}`;
+                } else if (imageSize === 'jpg') {
+                    epicUrl = `${CORS_PROXIES[currentProxyIndex]}https://epic.gsfc.nasa.gov/archive/natural/${datePath}/jpg/${img.image}.jpg`;
+                    nasaUrl = `https://api.nasa.gov/EPIC/archive/natural/${datePath}/jpg/${img.image}.jpg?api_key=${API_KEY}`;
+                } else {
+                    epicUrl = `${CORS_PROXIES[currentProxyIndex]}https://epic.gsfc.nasa.gov/archive/natural/${datePath}/png/${img.image}.png`;
+                    nasaUrl = `https://api.nasa.gov/EPIC/archive/natural/${datePath}/png/${img.image}.png?api_key=${API_KEY}`;
+                }
+                blob = await tryFetchImage(epicUrl, img.date);
+                if (!blob && rateLimitCount < 5) {
+                    blob = await tryFetchImage(nasaUrl, img.date);
+                }
+                if (blob) {
+                    downloadedImages.push({
+                        date: img.date,
+                        blob: blob,
+                        url: URL.createObjectURL(blob)
+                    });
+                } else {
+                    failedDownloads.push(img.date);
+                }
+                updateProgress(((i + 1) / imageMetadata.length) * 100);
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+            if (downloadedImages.length > 0) {
+                let statusMessage = `Images downloaded successfully.`;
+                if (failedDownloads.length > 0) {
+                    statusMessage = `Downloaded ${downloadedImages.length} of ${imageMetadata.length} images. Failed to download: ${failedDownloads.join(', ')}. Try activating CORS proxy or running on a local server.`;
+                    showStatus(statusMessage, 'warning');
+                } else {
+                    showStatus(statusMessage, 'success');
+                }
+                document.getElementById('createBtn').disabled = false;
+            } else {
+                let errorMessage = `Failed to download any images. `;
+                if (rateLimitCount >= 5) {
+                    errorMessage += `NASA API rate limit exceeded. `;
+                }
+                errorMessage += `Activate CORS proxy at <a href="${CORS_PROXIES[currentProxyIndex]}" target="_blank">proxy</a> or run on a local server.`;
+                showStatus(errorMessage, 'error');
+            }
+        }
+        async function createTimelapse() {
+            if (downloadedImages.length === 0) {
+                showStatus('No images available. Please download images first.', 'error');
+                return;
+            }
+            showStatus('Creating Earth Time-Lapse video...');
+            updateProgress(0);
+            try {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = 1920;
+                canvas.height = 1080;
+                const firstImg = new Image();
+                firstImg.src = downloadedImages[0].url;
+                await new Promise(resolve => {
+                    firstImg.onload = () => {
+                        resolve();
+                    };
+                    firstImg.onerror = () => {
+                        showStatus('Error loading first image for Earth Time-Lapse.', 'error');
+                        resolve();
+                    };
+                });
+                const frameRate = parseInt(document.getElementById('frameRate').value);
+                const stream = canvas.captureStream(frameRate);
+                const mediaRecorder = new MediaRecorder(stream, {
+                    mimeType: 'video/webm;codecs=vp9',
+                    videoBitsPerSecond: 5000000
+                });
+                const chunks = [];
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        chunks.push(event.data);
+                    }
+                };
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(chunks, { type: 'video/webm' });
+                    const videoUrl = URL.createObjectURL(blob);
+                    const videoContainer = document.getElementById('videoContainer');
+                    const video = document.getElementById('timelapseVideo');
+                    video.src = videoUrl;
+                    video.dataset.downloadUrl = videoUrl;
+                    videoContainer.style.display = '';
+                    showStatus('Earth Time-Lapse video created successfully.', 'success');
+                };
+                mediaRecorder.start();
+                for (let i = 0; i < downloadedImages.length; i++) {
+                    const img = new Image();
+                    img.src = downloadedImages[i].url;
+                    await new Promise(resolve => {
+                        img.onload = () => {
+                            ctx.clearRect(0, 0, canvas.width, canvas.height);
+                            const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
+                            const scaledWidth = img.width * scale;
+                            const scaledHeight = img.height * scale;
+                            const x = (canvas.width - scaledWidth) / 2;
+                            const y = (canvas.height - scaledHeight) / 2;
+                            ctx.drawImage(img, x, y, scaledWidth, scaledHeight);
+                            resolve();
+                        };
+                        img.onerror = () => {
+                            resolve();
+                        };
+                    });
+                    updateProgress(((i + 1) / downloadedImages.length) * 100);
+                    await new Promise(resolve => setTimeout(resolve, 1000 / frameRate));
+                }
+                setTimeout(() => {
+                    mediaRecorder.stop();
+                }, 2000);
+            } catch (error) {
+                showStatus('Error creating Earth Time-Lapse video: ' + error.message, 'error');
+            }
+        }
+        function downloadVideo() {
+            const video = document.getElementById('timelapseVideo');
+            const url = video.dataset.downloadUrl;
+            if (url) {
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Earth-Time-Lapse-${new Date().toISOString().split('T')[0]}.webm`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            } else {
+                showStatus('Error downloading Earth Time-Lapse video.', 'error');
+            }
+        }
+        window.onload = function() {
+            testAPIConnection();
+            setKnownGoodRange(0);
+        };
+    </script>
+</body>
+</html>
